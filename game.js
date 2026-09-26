@@ -82,6 +82,82 @@ ascendButton.addEventListener("click", function() {
 
 });
 
+let sonarObjects = [];
+
+function generateSonarObjects() {
+
+    sonarObjects = [];
+
+    const objectCount = Math.floor(Math.random() * 4) + 1;
+
+    for (let i = 0; i < objectCount; i++) {
+
+        const distance = Math.floor(Math.random() * 900) + 100;
+
+        let type;
+
+        if (depth < 500) {
+            type = "Rock Formation";
+        } else if (depth < 1500) {
+            type = Math.random() < 0.5 ? "Rock Formation" : "Unknown Object";
+        } else if (depth < 2500) {
+            type = Math.random() < 0.5 ? "Deep Trench" : "Unknown Object";
+        } else {
+            const objects = [
+                "Deep Trench",
+                "Hydrothermal Vent",
+                "Unknown Structure",
+                "Large Formation"
+            ];
+
+            type = objects[Math.floor(Math.random() * objects.length)];
+        }
+
+        sonarObjects.push({
+            type: type,
+            distance: distance
+        });
+    }
+}
+
+function displaySonar() {
+
+    sonar.innerHTML = `
+        <div class="sonar-screen">
+
+            <div class="sonar-grid"></div>
+
+            <div class="sonar-sweep"></div>
+
+            <div class="submarine-marker"></div>
+
+            ${sonarObjects.map(function(object) {
+
+                const angle = Math.random() * 360;
+                const distance = Math.min(object.distance / 10, 45);
+
+                return `
+                    <div
+                        class="sonar-object"
+                        style="
+                            transform:
+                            rotate(${angle}deg)
+                            translateY(-${distance}%);
+                        ">
+                    </div>
+                `;
+
+            }).join("")}
+
+        </div>
+
+        <div class="sonar-info">
+            <p>DEPTH: ${depth} m</p>
+            <p>CONTACTS: ${sonarObjects.length}</p>
+        </div>
+    `;
+}
+
 scanButton.addEventListener("click", function() {
 
     if (battery <= 0) {
@@ -96,21 +172,31 @@ scanButton.addEventListener("click", function() {
 
     battery -= 3;
 
-    sonar.innerHTML = `
-        <p>SONAR ACTIVE</p>
-        <p>Scanning at ${depth} m...</p>
-    `;
-
     addLog("Sonar scan initiated at " + depth + " m.");
+
+    sonar.innerHTML = `
+        <div class="sonar-screen scanning">
+            <div class="sonar-grid"></div>
+            <div class="sonar-sweep"></div>
+        </div>
+
+        <div class="sonar-info">
+            <p>SCANNING...</p>
+        </div>
+    `;
 
     setTimeout(function() {
 
-        sonar.innerHTML = `
-            <p>SONAR COMPLETE</p>
-            <p>No significant formations detected.</p>
-        `;
+        generateSonarObjects();
+        displaySonar();
 
-        addLog("Scan complete. No significant formations detected.");
+        addLog(
+            "Scan complete. " +
+            sonarObjects.length +
+            " contact(s) detected."
+        );
+
+        updateDisplay();
 
     }, 1500);
 
