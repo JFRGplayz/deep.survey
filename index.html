@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,51 +12,112 @@
 
 <body>
 
-    <header>
-        <h1>DEEP SURVEY</h1>
-        <p>Oceanographic Exploration Division</p>
-    </header>
+    <main id="camera">
 
-    <main>
+        <div id="camera-view">
+            <div class="water-particles"></div>
+            <div class="seafloor"></div>
 
-        <section class="status-panel">
-            <h2>SUBMERSIBLE STATUS</h2>
-
-            <div class="status">
-                <p>Depth: <span id="depth">0 m</span></p>
-                <p>Battery: <span id="battery">100%</span></p>
-                <p>Oxygen: <span id="oxygen">100%</span></p>
-                <p>Hull: <span id="hull">100%</span></p>
+            <div class="camera-label">
+                EXTERNAL CAMERA
             </div>
+        </div>
+
+
+        <section id="top-data" class="data-screen">
+
+            <div>
+                <span>DEPTH</span>
+                <strong id="depth">0 m</strong>
+            </div>
+
+            <div>
+                <span>HEADING</span>
+                <strong id="heading">000°</strong>
+            </div>
+
+            <div>
+                <span>SPEED</span>
+                <strong id="speed">0.0 kn</strong>
+            </div>
+
         </section>
 
-        <section class="survey-panel">
+
+        <section id="system-screen" class="data-screen">
+
+            <h2>SYSTEMS</h2>
+
+            <p>
+                OXYGEN
+                <span id="oxygen">100%</span>
+            </p>
+
+            <p>
+                BATTERY
+                <span id="battery">100%</span>
+            </p>
+
+            <p>
+                HULL
+                <span id="hull">100%</span>
+            </p>
+
+        </section>
+
+
+        <section id="sonar-screen" class="data-screen">
+
             <h2>SONAR</h2>
 
             <div id="sonar">
-                <p>SONAR ONLINE</p>
-                <p>Awaiting survey data...</p>
+
+                <div class="sonar-circle">
+                    <div class="sonar-sweep"></div>
+                    <div class="sonar-center"></div>
+                </div>
+
             </div>
+
+            <p id="contacts">
+                CONTACTS: 0
+            </p>
+
         </section>
 
-        <section class="controls-panel">
-            <h2>CONTROLS</h2>
 
-            <div class="controls">
-                <button id="descend">DESCEND</button>
-                <button id="ascend">ASCEND</button>
-                <button id="scan">SCAN AREA</button>
-            </div>
+        <section id="navigation-screen" class="data-screen">
+
+            <h2>NAVIGATION</h2>
+
+            <p>
+                POSITION
+                <span id="position">UNKNOWN</span>
+            </p>
+
+            <p>
+                DEPTH
+                <span id="nav-depth">0 m</span>
+            </p>
+
+            <p>
+                STATUS
+                <span>EXPLORING</span>
+            </p>
+
         </section>
 
-        <section class="log-panel">
+
+        <section id="log-screen" class="data-screen">
+
             <h2>SURVEY LOG</h2>
 
             <div id="log">
-                <p>> System initialized.</p>
-                <p>> Submersible ready.</p>
-                <p>> Awaiting instructions...</p>
+                <p>> SYSTEM INITIALIZED</p>
+                <p>> CAMERA ONLINE</p>
+                <p>> SUBMERSIBLE READY</p>
             </div>
+
         </section>
 
     </main>
@@ -63,4 +125,5 @@
     <script src="game.js"></script>
 
 </body>
+
 </html>
