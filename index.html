@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Deep Survey</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>DEEP SURVEY</h1>
+        <p>Oceanographic Exploration Division</p>
+    </header>
+
+    <main>
+
+        <section class="status-panel">
+            <h2>SUBMERSIBLE STATUS</h2>
+
+            <div class="status">
+                <p>Depth: <span id="depth">0 m</span></p>
+                <p>Battery: <span id="battery">100%</span></p>
+                <p>Oxygen: <span id="oxygen">100%</span></p>
+                <p>Hull: <span id="hull">100%</span></p>
+            </div>
+        </section>
+
+        <section class="survey-panel">
+            <h2>SONAR</h2>
+
+            <div id="sonar">
+                <p>SONAR ONLINE</p>
+                <p>Awaiting survey data...</p>
+            </div>
+        </section>
+
+        <section class="controls-panel">
+            <h2>CONTROLS</h2>
+
+            <div class="controls">
+                <button id="descend">DESCEND</button>
+                <button id="ascend">ASCEND</button>
+                <button id="scan">SCAN AREA</button>
+            </div>
+        </section>
+
+        <section class="log-panel">
+            <h2>SURVEY LOG</h2>
+
+            <div id="log">
+                <p>> System initialized.</p>
+                <p>> Submersible ready.</p>
+                <p>> Awaiting instructions...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="game.js"></script>
+
+</body>
+</html>
