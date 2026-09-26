@@ -1,47 +1,109 @@
+// ========================================
+// DEEP SURVEY
+// GAME LOGIC
+// ========================================
+
+
+// ========================================
+// SUBMARINE SYSTEMS
+// ========================================
+
 let depth = 0;
+let heading = 0;
+let speed = 0;
+
 let battery = 100;
 let oxygen = 100;
 let hull = 100;
 
 const maxDepth = 5000;
 
+
+// ========================================
+// HTML ELEMENTS
+// ========================================
+
 const depthDisplay = document.getElementById("depth");
-const batteryDisplay = document.getElementById("battery");
+const headingDisplay = document.getElementById("heading");
+const speedDisplay = document.getElementById("speed");
+
 const oxygenDisplay = document.getElementById("oxygen");
+const batteryDisplay = document.getElementById("battery");
 const hullDisplay = document.getElementById("hull");
 
+const navDepthDisplay = document.getElementById("nav-depth");
+const positionDisplay = document.getElementById("position");
+
 const sonar = document.getElementById("sonar");
+const contactsDisplay = document.getElementById("contacts");
+
 const log = document.getElementById("log");
 
-const descendButton = document.getElementById("descend");
-const ascendButton = document.getElementById("ascend");
-const scanButton = document.getElementById("scan");
+
+// ========================================
+// DISPLAY
+// ========================================
 
 function updateDisplay() {
-    depthDisplay.textContent = depth + " m";
-    batteryDisplay.textContent = Math.round(battery) + "%";
-    oxygenDisplay.textContent = Math.round(oxygen) + "%";
-    hullDisplay.textContent = Math.round(hull) + "%";
+
+    depthDisplay.textContent = Math.round(depth) + " m";
+
+    headingDisplay.textContent =
+        String(Math.round(heading)).padStart(3, "0") + "°";
+
+    speedDisplay.textContent =
+        speed.toFixed(1) + " kn";
+
+    oxygenDisplay.textContent =
+        Math.max(0, Math.round(oxygen)) + "%";
+
+    batteryDisplay.textContent =
+        Math.max(0, Math.round(battery)) + "%";
+
+    hullDisplay.textContent =
+        Math.max(0, Math.round(hull)) + "%";
+
+    navDepthDisplay.textContent =
+        Math.round(depth) + " m";
+
+    positionDisplay.textContent =
+        heading + "° / " + depth + " m";
 }
 
+
+// ========================================
+// LOG
+// ========================================
+
 function addLog(message) {
+
     const entry = document.createElement("p");
 
     entry.textContent = "> " + message;
 
     log.appendChild(entry);
+
     log.scrollTop = log.scrollHeight;
 }
 
-descendButton.addEventListener("click", function() {
+
+// ========================================
+// DESCEND
+// ========================================
+
+function descend() {
 
     if (depth >= maxDepth) {
+
         addLog("Maximum operating depth reached.");
+
         return;
     }
 
     if (battery <= 0 || oxygen <= 0) {
+
         addLog("WARNING: Submersible systems cannot continue.");
+
         return;
     }
 
@@ -50,20 +112,35 @@ descendButton.addEventListener("click", function() {
     battery -= 2;
     oxygen -= 1;
 
+    speed = 2.0;
+
     if (depth > 2000) {
         hull -= 0.5;
+    }
+
+    if (depth > 4000) {
+        hull -= 1;
     }
 
     updateDisplay();
 
     addLog("Descending to " + depth + " m.");
+}
 
-});
 
-ascendButton.addEventListener("click", function() {
+// ========================================
+// ASCEND
+// ========================================
+
+function ascend() {
 
     if (depth <= 0) {
+
+        depth = 0;
+        speed = 0;
+
         addLog("Submersible is already at the surface.");
+
         return;
     }
 
@@ -76,131 +153,160 @@ ascendButton.addEventListener("click", function() {
     battery -= 1;
     oxygen -= 0.5;
 
-    updateDisplay();
+    speed = 1.5;
 
-    addLog("Ascending to " + depth + " m.");
-
-});
-
-let sonarObjects = [];
-
-function generateSonarObjects() {
-
-    sonarObjects = [];
-
-    const objectCount = Math.floor(Math.random() * 4) + 1;
-
-    for (let i = 0; i < objectCount; i++) {
-
-        const distance = Math.floor(Math.random() * 900) + 100;
-
-        let type;
-
-        if (depth < 500) {
-            type = "Rock Formation";
-        } else if (depth < 1500) {
-            type = Math.random() < 0.5 ? "Rock Formation" : "Unknown Object";
-        } else if (depth < 2500) {
-            type = Math.random() < 0.5 ? "Deep Trench" : "Unknown Object";
-        } else {
-            const objects = [
-                "Deep Trench",
-                "Hydrothermal Vent",
-                "Unknown Structure",
-                "Large Formation"
-            ];
-
-            type = objects[Math.floor(Math.random() * objects.length)];
-        }
-
-        sonarObjects.push({
-            type: type,
-            distance: distance
-        });
+    if (depth === 0) {
+        speed = 0;
+        addLog("SURFACE REACHED.");
+    } else {
+        addLog("Ascending to " + depth + " m.");
     }
+
+    updateDisplay();
 }
 
-function displaySonar() {
 
-    sonar.innerHTML = `
-        <div class="sonar-screen">
+// ========================================
+// TURN LEFT
+// ========================================
 
-            <div class="sonar-grid"></div>
+function turnLeft() {
 
-            <div class="sonar-sweep"></div>
+    heading -= 10;
 
-            <div class="submarine-marker"></div>
+    if (heading < 0) {
+        heading += 360;
+    }
 
-            ${sonarObjects.map(function(object) {
-
-                const angle = Math.random() * 360;
-                const distance = Math.min(object.distance / 10, 45);
-
-                return `
-                    <div
-                        class="sonar-object"
-                        style="
-                            transform:
-                            rotate(${angle}deg)
-                            translateY(-${distance}%);
-                        ">
-                    </div>
-                `;
-
-            }).join("")}
-
-        </div>
-
-        <div class="sonar-info">
-            <p>DEPTH: ${depth} m</p>
-            <p>CONTACTS: ${sonarObjects.length}</p>
-        </div>
-    `;
+    updateDisplay();
 }
 
-scanButton.addEventListener("click", function() {
+
+// ========================================
+// TURN RIGHT
+// ========================================
+
+function turnRight() {
+
+    heading += 10;
+
+    if (heading >= 360) {
+        heading -= 360;
+    }
+
+    updateDisplay();
+}
+
+
+// ========================================
+// SONAR SCAN
+// ========================================
+
+function scan() {
 
     if (battery <= 0) {
+
         addLog("WARNING: Insufficient battery power.");
+
         return;
     }
 
     if (depth === 0) {
+
         addLog("Cannot perform deep survey at the surface.");
+
         return;
     }
 
     battery -= 3;
 
+    contactsDisplay.textContent = "SCANNING...";
+
     addLog("Sonar scan initiated at " + depth + " m.");
-
-    sonar.innerHTML = `
-        <div class="sonar-screen scanning">
-            <div class="sonar-grid"></div>
-            <div class="sonar-sweep"></div>
-        </div>
-
-        <div class="sonar-info">
-            <p>SCANNING...</p>
-        </div>
-    `;
 
     setTimeout(function() {
 
-        generateSonarObjects();
-        displaySonar();
+        const contactCount =
+            Math.floor(Math.random() * 4);
 
-        addLog(
-            "Scan complete. " +
-            sonarObjects.length +
-            " contact(s) detected."
-        );
+        contactsDisplay.textContent =
+            "CONTACTS: " + contactCount;
+
+        if (contactCount === 0) {
+
+            addLog(
+                "Scan complete. No significant contacts detected."
+            );
+
+        } else {
+
+            addLog(
+                "Scan complete. " +
+                contactCount +
+                " contact(s) detected."
+            );
+        }
 
         updateDisplay();
 
     }, 1500);
 
     updateDisplay();
+}
+
+
+// ========================================
+// KEYBOARD CONTROLS
+// ========================================
+
+document.addEventListener("keydown", function(event) {
+
+    // W = descend
+    if (event.key.toLowerCase() === "w") {
+
+        descend();
+    }
+
+
+    // S = ascend
+    if (event.key.toLowerCase() === "s") {
+
+        ascend();
+    }
+
+
+    // A = turn left
+    if (event.key.toLowerCase() === "a") {
+
+        turnLeft();
+    }
+
+
+    // D = turn right
+    if (event.key.toLowerCase() === "d") {
+
+        turnRight();
+    }
+
+
+    // SPACE = scan
+    if (event.code === "Space") {
+
+        event.preventDefault();
+
+        scan();
+    }
+
 });
 
+
+// ========================================
+// INITIAL STATE
+// ========================================
+
 updateDisplay();
+
+addLog("KEYBOARD CONTROLS ONLINE.");
+addLog("W / S : DEPTH CONTROL");
+addLog("A / D : HEADING CONTROL");
+addLog("SPACE : SONAR SCAN");
