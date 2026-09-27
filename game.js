@@ -1,312 +1,338 @@
-// ========================================
-// DEEP SURVEY
-// GAME LOGIC
-// ========================================
+import * as THREE from
+    "https://cdn.jsdelivr.net/npm/three@0.180/build/three.module.js";
 
 
 // ========================================
-// SUBMARINE SYSTEMS
+// THREE.JS SCENE
 // ========================================
 
-let depth = 0;
-let heading = 0;
-let speed = 0;
+const cameraView = document.getElementById("camera-view");
 
-let battery = 100;
-let oxygen = 100;
-let hull = 100;
+const scene = new THREE.Scene();
 
-const maxDepth = 5000;
+scene.background = new THREE.Color(0x061820);
 
-
-// ========================================
-// HTML ELEMENTS
-// ========================================
-
-const depthDisplay = document.getElementById("depth");
-const headingDisplay = document.getElementById("heading");
-const speedDisplay = document.getElementById("speed");
-
-const oxygenDisplay = document.getElementById("oxygen");
-const batteryDisplay = document.getElementById("battery");
-const hullDisplay = document.getElementById("hull");
-
-const navDepthDisplay = document.getElementById("nav-depth");
-const positionDisplay = document.getElementById("position");
-
-const sonar = document.getElementById("sonar");
-const contactsDisplay = document.getElementById("contacts");
-
-const log = document.getElementById("log");
+scene.fog = new THREE.FogExp2(
+    0x061820,
+    0.018
+);
 
 
 // ========================================
-// DISPLAY
+// CAMERA
 // ========================================
 
-function updateDisplay() {
+const camera = new THREE.PerspectiveCamera(
+    75,
+    cameraView.clientWidth / cameraView.clientHeight,
+    0.1,
+    1000
+);
 
-    depthDisplay.textContent = Math.round(depth) + " m";
-
-    headingDisplay.textContent =
-        String(Math.round(heading)).padStart(3, "0") + "°";
-
-    speedDisplay.textContent =
-        speed.toFixed(1) + " kn";
-
-    oxygenDisplay.textContent =
-        Math.max(0, Math.round(oxygen)) + "%";
-
-    batteryDisplay.textContent =
-        Math.max(0, Math.round(battery)) + "%";
-
-    hullDisplay.textContent =
-        Math.max(0, Math.round(hull)) + "%";
-
-    navDepthDisplay.textContent =
-        Math.round(depth) + " m";
-
-    positionDisplay.textContent =
-        heading + "° / " + depth + " m";
-}
+camera.position.set(0, 2, 10);
 
 
 // ========================================
-// LOG
+// RENDERER
 // ========================================
 
-function addLog(message) {
-
-    const entry = document.createElement("p");
-
-    entry.textContent = "> " + message;
-
-    log.appendChild(entry);
-
-    log.scrollTop = log.scrollHeight;
-}
-
-
-// ========================================
-// DESCEND
-// ========================================
-
-function descend() {
-
-    if (depth >= maxDepth) {
-
-        addLog("Maximum operating depth reached.");
-
-        return;
-    }
-
-    if (battery <= 0 || oxygen <= 0) {
-
-        addLog("WARNING: Submersible systems cannot continue.");
-
-        return;
-    }
-
-    depth += 100;
-
-    battery -= 2;
-    oxygen -= 1;
-
-    speed = 2.0;
-
-    if (depth > 2000) {
-        hull -= 0.5;
-    }
-
-    if (depth > 4000) {
-        hull -= 1;
-    }
-
-    updateDisplay();
-
-    addLog("Descending to " + depth + " m.");
-}
-
-
-// ========================================
-// ASCEND
-// ========================================
-
-function ascend() {
-
-    if (depth <= 0) {
-
-        depth = 0;
-        speed = 0;
-
-        addLog("Submersible is already at the surface.");
-
-        return;
-    }
-
-    depth -= 100;
-
-    if (depth < 0) {
-        depth = 0;
-    }
-
-    battery -= 1;
-    oxygen -= 0.5;
-
-    speed = 1.5;
-
-    if (depth === 0) {
-        speed = 0;
-        addLog("SURFACE REACHED.");
-    } else {
-        addLog("Ascending to " + depth + " m.");
-    }
-
-    updateDisplay();
-}
-
-
-// ========================================
-// TURN LEFT
-// ========================================
-
-function turnLeft() {
-
-    heading -= 10;
-
-    if (heading < 0) {
-        heading += 360;
-    }
-
-    updateDisplay();
-}
-
-
-// ========================================
-// TURN RIGHT
-// ========================================
-
-function turnRight() {
-
-    heading += 10;
-
-    if (heading >= 360) {
-        heading -= 360;
-    }
-
-    updateDisplay();
-}
-
-
-// ========================================
-// SONAR SCAN
-// ========================================
-
-function scan() {
-
-    if (battery <= 0) {
-
-        addLog("WARNING: Insufficient battery power.");
-
-        return;
-    }
-
-    if (depth === 0) {
-
-        addLog("Cannot perform deep survey at the surface.");
-
-        return;
-    }
-
-    battery -= 3;
-
-    contactsDisplay.textContent = "SCANNING...";
-
-    addLog("Sonar scan initiated at " + depth + " m.");
-
-    setTimeout(function() {
-
-        const contactCount =
-            Math.floor(Math.random() * 4);
-
-        contactsDisplay.textContent =
-            "CONTACTS: " + contactCount;
-
-        if (contactCount === 0) {
-
-            addLog(
-                "Scan complete. No significant contacts detected."
-            );
-
-        } else {
-
-            addLog(
-                "Scan complete. " +
-                contactCount +
-                " contact(s) detected."
-            );
-        }
-
-        updateDisplay();
-
-    }, 1500);
-
-    updateDisplay();
-}
-
-
-// ========================================
-// KEYBOARD CONTROLS
-// ========================================
-
-document.addEventListener("keydown", function(event) {
-
-    // W = descend
-    if (event.key.toLowerCase() === "w") {
-
-        descend();
-    }
-
-
-    // S = ascend
-    if (event.key.toLowerCase() === "s") {
-
-        ascend();
-    }
-
-
-    // A = turn left
-    if (event.key.toLowerCase() === "a") {
-
-        turnLeft();
-    }
-
-
-    // D = turn right
-    if (event.key.toLowerCase() === "d") {
-
-        turnRight();
-    }
-
-
-    // SPACE = scan
-    if (event.code === "Space") {
-
-        event.preventDefault();
-
-        scan();
-    }
-
+const renderer = new THREE.WebGLRenderer({
+    antialias: true
 });
 
+renderer.setSize(
+    cameraView.clientWidth,
+    cameraView.clientHeight
+);
+
+renderer.setPixelRatio(
+    Math.min(window.devicePixelRatio, 2)
+);
+
+cameraView.appendChild(renderer.domElement);
+
 
 // ========================================
-// INITIAL STATE
+// LIGHTING
 // ========================================
 
-updateDisplay();
+const ambientLight = new THREE.HemisphereLight(
+    0x6fa9bd,
+    0x02080b,
+    1.5
+);
 
-addLog("KEYBOARD CONTROLS ONLINE.");
-addLog("W / S : DEPTH CONTROL");
-addLog("A / D : HEADING CONTROL");
-addLog("SPACE : SONAR SCAN");
+scene.add(ambientLight);
+
+
+const submarineLight = new THREE.PointLight(
+    0xbdefff,
+    10,
+    60
+);
+
+submarineLight.position.set(
+    0,
+    0,
+    0
+);
+
+scene.add(submarineLight);
+
+
+// ========================================
+// SEAFLOOR
+// ========================================
+
+const floorGeometry = new THREE.PlaneGeometry(
+    500,
+    500,
+    50,
+    50
+);
+
+const floorMaterial = new THREE.MeshStandardMaterial({
+    color: 0x172327,
+    roughness: 1
+});
+
+const seafloor = new THREE.Mesh(
+    floorGeometry,
+    floorMaterial
+);
+
+seafloor.rotation.x = -Math.PI / 2;
+
+seafloor.position.y = -20;
+
+scene.add(seafloor);
+
+
+// ========================================
+// ROCKS
+// ========================================
+
+function createRock(x, y, z, scale) {
+
+    const geometry = new THREE.DodecahedronGeometry(
+        scale,
+        1
+    );
+
+    const material = new THREE.MeshStandardMaterial({
+        color: 0x27383b,
+        roughness: 1
+    });
+
+    const rock = new THREE.Mesh(
+        geometry,
+        material
+    );
+
+    rock.position.set(x, y, z);
+
+    rock.rotation.set(
+        Math.random(),
+        Math.random(),
+        Math.random()
+    );
+
+    scene.add(rock);
+}
+
+
+// Create some rocks
+for (let i = 0; i < 50; i++) {
+
+    const x = (Math.random() - 0.5) * 200;
+    const z = (Math.random() - 0.5) * 200;
+
+    const scale =
+        Math.random() * 3 + 1;
+
+    createRock(
+        x,
+        -17,
+        z,
+        scale
+    );
+}
+
+
+// ========================================
+// MOVEMENT
+// ========================================
+
+const keys = {};
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        keys[event.code] = true;
+
+    }
+);
+
+document.addEventListener(
+    "keyup",
+    function(event) {
+
+        keys[event.code] = false;
+
+    }
+);
+
+
+// ========================================
+// MOUSE LOOK
+// ========================================
+
+let yaw = 0;
+let pitch = 0;
+
+document.addEventListener(
+    "mousemove",
+    function(event) {
+
+        if (document.pointerLockElement !== renderer.domElement) {
+            return;
+        }
+
+        yaw -= event.movementX * 0.002;
+
+        pitch -= event.movementY * 0.002;
+
+        pitch = Math.max(
+            -Math.PI / 2,
+            Math.min(Math.PI / 2, pitch)
+        );
+
+    }
+);
+
+
+// Click camera to activate mouse look
+
+renderer.domElement.addEventListener(
+    "click",
+    function() {
+
+        renderer.domElement.requestPointerLock();
+
+    }
+);
+
+
+// ========================================
+// MOVEMENT SETTINGS
+// ========================================
+
+const moveSpeed = 0.15;
+
+
+// ========================================
+// GAME LOOP
+// ========================================
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+
+    // ------------------------------------
+    // CAMERA ROTATION
+    // ------------------------------------
+
+    camera.rotation.order = "YXZ";
+
+    camera.rotation.y = yaw;
+
+    camera.rotation.x = pitch;
+
+
+    // ------------------------------------
+    // MOVEMENT
+    // ------------------------------------
+
+    const direction = new THREE.Vector3();
+
+    camera.getWorldDirection(direction);
+
+
+    // Forward
+    if (keys["KeyW"]) {
+
+        camera.position.addScaledVector(
+            direction,
+            moveSpeed
+        );
+
+    }
+
+
+    // Backward
+    if (keys["KeyS"]) {
+
+        camera.position.addScaledVector(
+            direction,
+            -moveSpeed
+        );
+
+    }
+
+
+    // Left
+    if (keys["KeyA"]) {
+
+        camera.position.x -=
+            Math.cos(yaw) * moveSpeed;
+
+        camera.position.z +=
+            Math.sin(yaw) * moveSpeed;
+
+    }
+
+
+    // Right
+    if (keys["KeyD"]) {
+
+        camera.position.x +=
+            Math.cos(yaw) * moveSpeed;
+
+        camera.position.z -=
+            Math.sin(yaw) * moveSpeed;
+
+    }
+
+
+    renderer.render(
+        scene,
+        camera
+    );
+}
+
+animate();
+
+
+// ========================================
+// RESIZE
+// ========================================
+
+window.addEventListener(
+    "resize",
+    function() {
+
+        camera.aspect =
+            cameraView.clientWidth /
+            cameraView.clientHeight;
+
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(
+            cameraView.clientWidth,
+            cameraView.clientHeight
+        );
+
+    }
+);
